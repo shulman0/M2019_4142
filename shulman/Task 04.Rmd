@@ -1,0 +1,61 @@
+---
+title: "Weather"
+output: html_document
+word_document: default
+html_document: default
+---
+##Loading libraries
+
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(magrittr)
+library(purrr)
+```
+
+##Loading data
+```{r}
+weather <- readRDS("/Users/shulman/Desktop/weather.rds")
+head (weather)
+```
+
+##Tidying data
+```{r}
+w1 <- select (weather, -X)
+names(w1)[4:34] <- '1':'31'
+head(w1)
+```
+
+```{r}
+w_l <- pivot_longer(w1, cols= '1':'31', names_to = 'day')
+weather_new <- pivot_wider (w_l,names_from = measure, values_from = value)
+head(weather_new)
+```
+```{r}
+weather_comf <- unite (weather_new, Y_M_D, year, month, day)
+head (weather_comf)
+```
+
+###Removing NA
+```{r}
+sum (is.na(weather_comf))
+weather_best <- na.omit(weather_comf)
+```
+
+###The result
+```{r}
+weather_bestone = purrr:: map_dfc(weather_best[c(2:21,23)], .f= as.numeric)
+weather_bestone$Date = weather_best$Y_M_D
+weather_bestone$Events= as.factor(weather_best$Events)
+str(weather_bestone)
+```
+```{r}
+summary(weather_bestone) ###преобразовать саммари (типы переменных/столбцов)
+```
+```{r}
+head(weather_bestone)
+```
+
+###The end
